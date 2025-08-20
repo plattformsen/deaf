@@ -139,6 +139,7 @@ function run_verify_versions {
     error "Failed to checkout sha %s for verification." "$sha"
     return 1
   fi
+  chmod +x "$SCRIPTS_DIR/verify-versions.sh"
   if ! "$SCRIPTS_DIR/verify-versions.sh" "$expected_version"; then
     error "not pushing: version verification failed for sha %s with expected version %s." "$sha" "$expected_version"
     return 1
