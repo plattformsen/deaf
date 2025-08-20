@@ -18,6 +18,12 @@ function debug {
   if [[ -z "${DEBUG:-}" ]]; then
     return
   fi
+  if [[ $# -eq 0 ]]; then
+    while IFS= read -r line; do
+      >&2 printf "debug: %s\n" "$line"
+    done
+    return
+  fi
   # shellcheck disable=SC2059
   >&2 printf "debug: $1\n" "${@:2}"
 }
@@ -128,7 +134,7 @@ debug "Currently checked out ref: %s" "$current_ref"
 # stash any changes to ensure we can restore the repository state
 debug "Stashing any changes before processing tags..."
 if [[ "$IS_DEBUGGING" == true ]]; then
-  git status --porcelain
+  git status --porcelain | debug
 fi
 has_changes="$(git status --porcelain)"
 stashed=false
