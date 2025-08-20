@@ -121,6 +121,9 @@ function run_verify_versions {
     error "Failed to checkout sha %s for verification." "$sha"
     return 1
   fi
+  
 }
+
+
 
 exit 2
