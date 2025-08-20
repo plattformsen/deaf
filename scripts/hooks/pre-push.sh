@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PARENT_DIR="$(dirname "$SCRIPT_DIR")"
+
 set -euo pipefail
 
 function debug {
@@ -134,9 +137,21 @@ function run_verify_versions {
     error "Failed to checkout sha %s for verification." "$sha"
     return 1
   fi
-  
+  if ! "$PARENT_DIR/verify-versions.sh" "$expected_version"; then
+    error "not pushing: version verification failed for sha %s with expected version %s." "$sha" "$expected_version"
+    return 1
+  fi
+  debug "Version verification succeeded for sha %s with expected version %s." "$sha" "$expected_version"
 }
 
-
+for entry in "${shaAndExpectedVersion[@]}"; do
+  sha="${entry%%:*}"
+  expected_version="${entry#*:}"
+  debug "Processing sha %s with expected version %s" "$sha" "$expected_version"
+  
+  if ! run_verify_versions "$sha" "$expected_version"; then
+    exit 1
+  fi
+done
 
 exit 2
