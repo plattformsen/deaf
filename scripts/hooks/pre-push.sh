@@ -107,6 +107,11 @@ while read local_ref local_oid remote_ref remote_oid; do
   esac
 done
 
+if [[ ${#shaAndExpectedVersion[@]} -eq 0 ]]; then
+  debug "No tags found to process."
+  exit 0
+fi
+
 debug "shaAndExpectedVersion: %s" "${shaAndExpectedVersion[*]}"
 
 if [[ ${#shaAndExpectedVersion[@]} -eq 0 ]]; then
