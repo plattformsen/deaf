@@ -109,6 +109,7 @@ function restore_state {
   fi
 
   if [ "$stashed" = true ]; then
+    debug "Restoring stash: %s" "$stash_ref"
     if ! git stash pop --index; then
       error "Failed to restore: could not pop stash, stash preserved:  %s" "$stash_ref"
       return 1
