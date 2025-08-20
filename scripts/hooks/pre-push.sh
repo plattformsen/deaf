@@ -99,6 +99,10 @@ fi
 # shellcheck disable=SC2329
 function restore_state {
   debug "Restoring state..."
+  
+  if [[ "$current_ref" == refs/heads/* ]]; then
+    current_ref="${current_ref#refs/heads/}"
+  fi
 
   debug "Checking out original ref: %s" "$current_ref"
   if ! git checkout "$current_ref"; then
