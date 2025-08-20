@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PARENT_DIR="$(dirname "$SCRIPT_DIR")"
+GIT_DIR="$(dirname "$SCRIPT_DIR")"
+REPO_ROOT_DIR="$(dirname "$GIT_DIR")"
+SCRIPTS_DIR="$REPO_ROOT_DIR/scripts"
 
 set -euo pipefail
 
@@ -137,7 +139,7 @@ function run_verify_versions {
     error "Failed to checkout sha %s for verification." "$sha"
     return 1
   fi
-  if ! "$PARENT_DIR/verify-versions.sh" "$expected_version"; then
+  if ! "$SCRIPTS_DIR/verify-versions.sh" "$expected_version"; then
     error "not pushing: version verification failed for sha %s with expected version %s." "$sha" "$expected_version"
     return 1
   fi
