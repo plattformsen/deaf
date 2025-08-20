@@ -1,10 +1,5 @@
 #!/usr/bin/env bash
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-GIT_DIR="$(dirname "$SCRIPT_DIR")"
-REPO_ROOT_DIR="$(dirname "$GIT_DIR")"
-SCRIPTS_DIR="$REPO_ROOT_DIR/scripts"
-
 set -euo pipefail
 
 function debug {
@@ -19,6 +14,38 @@ function error {
   # shellcheck disable=SC2059
   >&2 printf "\x1b[31merror: $1\n\x1b[0m" "${@:2}"
 }
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+GIT_DIR="$(dirname "$SCRIPT_DIR")"
+REPO_ROOT_DIR="$(dirname "$GIT_DIR")"
+SCRIPTS_DIR="$REPO_ROOT_DIR/scripts"
+DEP_DIR="$GIT_DIR/user-scripts"
+
+dependencies=(
+  "$SCRIPTS_DIR/verify-versions.sh:$DEP_DIR/verify-versions"
+)
+
+for dep in "${dependencies[@]}"; do
+  src="${dep%%:*}"
+  dest="${dep#*:}"
+  
+  if [[ ! -f "$src" ]]; then
+    error "source file $src does not exist."
+    exit 1
+  fi
+  
+  if [[ ! -d "$DEP_DIR" ]]; then
+    mkdir -p "$DEP_DIR"
+  fi
+  
+  if [[ -f "$dest" ]]; then
+    debug "warning: destination file $dest already exists, overwriting."
+    rm "$dest"
+  fi
+  cp "$src" "$dest"
+  chmod +x "$dest"
+  debug "Copied $src to $dest"
+done
 
 remote="$1"
 url="$2"
@@ -139,8 +166,7 @@ function run_verify_versions {
     error "Failed to checkout sha %s for verification." "$sha"
     return 1
   fi
-  chmod +x "$SCRIPTS_DIR/verify-versions.sh"
-  if ! "$SCRIPTS_DIR/verify-versions.sh" "$expected_version"; then
+  if ! "$DEP_DIR/verify-versions.sh" "$expected_version"; then
     error "not pushing: version verification failed for sha %s with expected version %s." "$sha" "$expected_version"
     return 1
   fi
