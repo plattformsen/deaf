@@ -98,9 +98,14 @@ fi
 
 # shellcheck disable=SC2329
 function restore_state {
+  debug "Restoring state..."
+
+  debug "Checking out original ref: %s" "$current_ref"
   if ! git checkout "$current_ref"; then
     error "Failed to restore: could not checkout %s" "$current_ref"
     return 1
+  else
+    debug "Successfully restored to %s" "$current_ref"
   fi
 
   if [ "$stashed" = true ]; then
@@ -108,6 +113,9 @@ function restore_state {
       error "Failed to restore: could not pop stash, stash preserved:  %s" "$stash_ref"
       return 1
     fi
+    debug "Successfully restored stash: %s" "$stash_ref"
+  else
+    debug "No stash to restore."
   fi
 }
 
