@@ -1,0 +1,14 @@
+{
+  "workspace": [
+    "rdns"
+  ],
+  "tasks": {
+    "init": {
+      "command": "echo initialized!",
+      "dependencies": [
+        "init:git-hooks"
+      ]
+    },
+    "init:git-hooks": "./scripts/initialize-git-hooks.sh"
+  }
+}
