@@ -1,5 +1,31 @@
 #!/usr/bin/env bash
 
+#
+#
+# Please, stop looking here.
+#
+# This bash script looks terrible.
+#
+# Stop looking at it, please.
+#
+# Go away!
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+
 set -euo pipefail
 
 IS_DEBUGGING=false

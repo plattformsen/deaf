@@ -1,5 +1,31 @@
 #!/usr/bin/env bash
 
+#
+#
+# Please, stop looking here.
+#
+# This bash script looks terrible.
+#
+# Stop looking at it, please.
+#
+# Go away!
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+
 # This script sets a version for all defined packages in the Deno workspace.
 
 set -euo pipefail
