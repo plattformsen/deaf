@@ -2,27 +2,18 @@
 
 set -euo pipefail
 
-IS_DEBUGGING=true
-
-if [[ -z "${DEBUG:-}" ]]; then
-  IS_DEBUGGING=false
-fi
-
-function keep_if_not_debug {
-  if [[ -z "${DEBUG:-}" ]]; then
-    echo -n "$1"
-  fi
-}
+IS_DEBUGGING=false
+[ "${DEBUG+x}" ] && IS_DEBUGGING=true
 
 function debug {
-  if [[ -z "${DEBUG:-}" ]]; then
-    return
+  if [[ "$IS_DEBUGGING" == false ]]; then
+    return 0
   fi
   if [[ $# -eq 0 ]]; then
     while IFS= read -r line; do
       >&2 printf "debug: %s\n" "$line"
     done
-    return
+    return 0
   fi
   # shellcheck disable=SC2059
   >&2 printf "debug: $1\n" "${@:2}"
@@ -40,26 +31,29 @@ SCRIPTS_DIR="$REPO_ROOT_DIR/scripts"
 DEP_DIR="$GIT_DIR/user-scripts"
 
 dependencies=(
-  "$SCRIPTS_DIR/verify-versions.sh:$DEP_DIR/verify-versions"
+  "$SCRIPTS_DIR/.verify-versions.sh:$DEP_DIR/verify-versions"
 )
 
 for dep in "${dependencies[@]}"; do
   src="${dep%%:*}"
   dest="${dep#*:}"
-  
+  debug "Copying $src to $dest"
+
   if [[ ! -f "$src" ]]; then
     error "source file $src does not exist."
     exit 1
   fi
-  
+
   if [[ ! -d "$DEP_DIR" ]]; then
+    debug "Creating directory $DEP_DIR"
     mkdir -p "$DEP_DIR"
   fi
-  
+
   if [[ -f "$dest" ]]; then
     debug "warning: destination file $dest already exists, overwriting."
     rm "$dest"
   fi
+
   cp "$src" "$dest"
   chmod +x "$dest"
   debug "Copied $src to $dest"
@@ -140,14 +134,18 @@ has_changes="$(git status --porcelain)"
 stashed=false
 stash_ref=""
 
-GIT_QUIET_FLAG="$(keep_if_not_debug "--quiet")"
-
 if [ -n "$has_changes" ]; then
   msg="script-temp-stash-$(date +%s)"
-  # shellcheck disable=SC2086
-  if ! git stash push $GIT_QUIET_FLAG -u -m "$msg"; then
-    error "Failed to stash changes. Please resolve any conflicts and try again."
-    exit 1
+  if [ "$IS_DEBUGGING" == true ]; then
+    if ! git stash push -u -m "$msg" | debug; then
+      error "Failed to stash changes. Please resolve any conflicts and try again."
+      exit 1
+    fi
+  else
+    if ! git stash push --quiet -u -m "$msg"; then
+      error "Failed to stash changes. Please resolve any conflicts and try again."
+      exit 1
+    fi
   fi
   stash_ref="$(git rev-parse --verify refs/stash 2>/dev/null || true)"
   stashed=true
@@ -156,24 +154,40 @@ fi
 # shellcheck disable=SC2329
 function restore_state {
   debug "Restoring state..."
-  
+
   if [[ "$current_ref" == refs/heads/* ]]; then
     current_ref="${current_ref#refs/heads/}"
   fi
 
   debug "Checking out original ref: %s" "$current_ref"
-  if ! git checkout "$current_ref"; then
-    error "Failed to restore: could not checkout %s" "$current_ref"
-    return 1
+  if [ "$IS_DEBUGGING" == true ]; then
+    if ! git checkout "$current_ref" 2>&1 | debug; then
+      error "Failed to restore: could not checkout %s" "$current_ref"
+      return 1
+    else
+      debug "Successfully restored to %s" "$current_ref"
+    fi
   else
-    debug "Successfully restored to %s" "$current_ref"
+    if ! git checkout --quiet "$current_ref"; then
+      error "Failed to restore: could not checkout %s" "$current_ref"
+      return 1
+    else
+      debug "Successfully restored to %s" "$current_ref"
+    fi
   fi
 
   if [ "$stashed" = true ]; then
     debug "Restoring stash: %s" "$stash_ref"
-    if ! git stash pop --index; then
-      error "Failed to restore: could not pop stash, stash preserved:  %s" "$stash_ref"
-      return 1
+    if [ "$IS_DEBUGGING" == true ]; then
+      if ! git stash pop --index | debug; then
+        error "Failed to restore: could not pop stash, stash preserved: %s" "$stash_ref"
+        return 1
+      fi
+    else
+      if ! git stash pop --index --quiet; then
+        error "Failed to restore: could not pop stash, stash preserved: %s" "$stash_ref"
+        return 1
+      fi
     fi
     debug "Successfully restored stash: %s" "$stash_ref"
   else
@@ -191,7 +205,7 @@ function run_verify_versions {
     error "Failed to checkout sha %s for verification." "$sha"
     return 1
   fi
-  if ! "$DEP_DIR/verify-versions.sh" "$expected_version"; then
+  if ! "$DEP_DIR/verify-versions" "$expected_version"; then
     error "not pushing: version verification failed for sha %s with expected version %s." "$sha" "$expected_version"
     return 1
   fi
