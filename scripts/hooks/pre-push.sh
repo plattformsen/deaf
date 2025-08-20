@@ -2,6 +2,18 @@
 
 set -euo pipefail
 
+IS_DEBUGGING=true
+
+if [[ -z "${DEBUG:-}" ]]; then
+  IS_DEBUGGING=false
+fi
+
+function keep_if_not_debug {
+  if [[ -z "${DEBUG:-}" ]]; then
+    echo -n "$1"
+  fi
+}
+
 function debug {
   if [[ -z "${DEBUG:-}" ]]; then
     return
@@ -114,13 +126,20 @@ fi
 debug "Currently checked out ref: %s" "$current_ref"
 
 # stash any changes to ensure we can restore the repository state
-has_changes=$(git status --porcelain)
+debug "Stashing any changes before processing tags..."
+if [[ "$IS_DEBUGGING" == true ]]; then
+  git status --porcelain
+fi
+has_changes="$(git status --porcelain)"
 stashed=false
 stash_ref=""
 
+GIT_QUIET_FLAG="$(keep_if_not_debug "--quiet")"
+
 if [ -n "$has_changes" ]; then
   msg="script-temp-stash-$(date +%s)"
-  if ! git stash push -u -m "$msg"; then
+  # shellcheck disable=SC2086
+  if ! git stash push $GIT_QUIET_FLAG -u -m "$msg"; then
     error "Failed to stash changes. Please resolve any conflicts and try again."
     exit 1
   fi
