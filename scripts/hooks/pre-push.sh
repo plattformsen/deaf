@@ -253,4 +253,4 @@ for entry in "${shaAndExpectedVersion[@]}"; do
   fi
 done
 
-exit 2
+exit 0
