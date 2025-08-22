@@ -1,3 +1,8 @@
+/**
+ * Convert a 16-byte IPv6 address into its reverse-nibble ip6.arpa name.
+ * Order: iterate bytes from last to first; within each byte, low nibble then high nibble.
+ * Example: ::1 -> "1.0.0....0.ip6.arpa."
+ */
 export function hostify6(ip: Uint8Array): string {
   let str = "";
 
