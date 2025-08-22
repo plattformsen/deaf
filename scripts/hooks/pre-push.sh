@@ -109,9 +109,9 @@ while read local_ref local_oid remote_ref remote_oid; do
   fi
 
   case "$local_ref" in
-    refs/tags/*)
+    refs/tags/v*)
       sha="$local_oid"
-      version="${local_ref#refs/tags/}"
+      version="${local_ref#refs/tags/v}"
       debug "Processing sha %s and version %s" "$sha" "$version"
       if [[ "$sha" == "$zero" ]]; then
         debug "Skipping zero sha %s" "$sha"
