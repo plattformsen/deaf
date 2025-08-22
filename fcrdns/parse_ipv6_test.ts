@@ -1,4 +1,4 @@
-import { assertEquals } from "@std/assert/equals";
+import { assertEquals } from "@std/assert";
 import { parseIPv6 } from "./parse_ipv6.ts";
 
 // deno-fmt-ignore

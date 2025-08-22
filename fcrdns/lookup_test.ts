@@ -1,7 +1,6 @@
-import { assertEquals } from "@std/assert/equals";
+import { assertEquals, assertRejects } from "@std/assert";
 import { createDnsContainer } from "./_dns_testcontainers.ts";
 import { lookup } from "./lookup.ts";
-import { assertRejects } from "@std/assert";
 import { hostify6 } from "./hostify6.ts";
 import { parseIPv6 } from "./parse_ipv6.ts";
 
