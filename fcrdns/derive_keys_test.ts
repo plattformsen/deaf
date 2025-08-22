@@ -1,7 +1,7 @@
 import { assertEquals } from "@std/assert";
 import { deriveKeys } from "./derive_keys.ts";
 
-Deno.test("deriveKeys with empty input should return *. and **. as the only key", () => {
+Deno.test("deriveKeys with root '.' should return '.', '*.', and '**.'", () => {
   assertEquals(deriveKeys("."), [".", "*.", "**."]);
 });
 
