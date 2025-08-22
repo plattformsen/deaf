@@ -1,7 +1,4 @@
 {
-  "workspace": [
-    "rdns"
-  ],
   "tasks": {
     "init": {
       "command": "echo initialized!",
@@ -9,6 +6,13 @@
         "init:git-hooks"
       ]
     },
-    "init:git-hooks": "./scripts/initialize-git-hooks.sh"
-  }
+    "init:git-hooks": "./scripts/initialize-git-hooks.sh",
+    "test": "deno test -A '**/*_test.ts'",
+    "lint": "deno lint",
+    "format:check": "deno fmt --check",
+    "format": "deno fmt"
+  },
+  "workspace": [
+    "fcrdns"
+  ]
 }
