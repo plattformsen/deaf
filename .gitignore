@@ -15,3 +15,4 @@
 !/.coderabbit.yaml
 !/.gitignore
 !/deno.lock
+!/LICENSE
