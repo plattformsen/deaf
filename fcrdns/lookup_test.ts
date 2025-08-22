@@ -61,9 +61,9 @@ Deno.test(
     ]);
 
     await t.step("ip4", async () => {
-      const result = await lookup("::2", { nameServer });
+      const result = await lookup("1.1.1.1", { nameServer });
 
-      assertEquals(result.ip, "::2");
+      assertEquals(result.ip, "1.1.1.1");
       assertEquals(s(result.hostnames), s(["example.com.", "example.org."]));
       assertEquals(
         s(result.resolvedHostnames),
